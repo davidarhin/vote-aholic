@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOTE-AHOLIC - Database Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .nav-tabs button {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .nav-tabs button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .nav-tabs button:hover {
+            color: #667eea;
+        }
+
+        .content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+        }
+
+        .btn-warning {
+            background: #f6ad55;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #ed8936;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(237, 137, 54, 0.4);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f7fafc;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #2d3748;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:hover {
+            background: #f7fafc;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #a0aec0;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #c6f6d5;
+            color: #22543d;
+            display: block;
+        }
+
+        .alert.error {
+            background: #fed7d7;
+            color: #742a2a;
+            display: block;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-warning {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .refresh-btn {
+            margin-left: auto;
+        }
+
+        .time {
+            color: #a0aec0;
+            font-size: 12px;
+        }
+
+        .election-detail {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .election-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .election-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .election-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🗳️ VOTE-AHOLIC Admin Panel</h1>
+            <p class="subtitle">Database & System Management</p>
+            
+            <div class="nav-tabs">
+                <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="tab-btn" data-tab="elections">Elections</button>
+                <button class="tab-btn" data-tab="candidates">Candidates</button>
+                <button class="tab-btn" data-tab="votes">Votes</button>
+                <button class="tab-btn" data-tab="users">Users</button>
+                <button class="tab-btn" data-tab="admin" style="margin-left: auto; color: #f56565;">⚙️ Admin Tools</button>
+            </div>
+        </header>
+
+        <div class="content">
+            <div id="alert" class="alert"></div>
+
+            <!-- DASHBOARD TAB -->
+            <div id="dashboard" class="tab-pane active">
+                <h2 style="margin-bottom: 20px;">System Overview</h2>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="userCount">-</div>
+                        <div class="stat-label">Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="electionCount">-</div>
+                        <div class="stat-label">Elections</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="candidateCount">-</div>
+                        <div class="stat-label">Candidates</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="voteCount">-</div>
+                        <div class="stat-label">Votes Cast</div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 40px 0 20px 0;">Active Elections</h3>
+                <div id="dashboardElections"></div>
+
+                <div class="action-buttons" style="margin-top: 40px;">
+                    <button class="btn-primary" onclick="refreshDashboard()">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <!-- ELECTIONS TAB -->
+            <div id="elections" class="tab-pane">
+                <h2 style="margin-bottom: 20px;">Elections</h2>
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="loadElections()">🔄 Refresh</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="electionsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="electionsBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="electionsEmpty" class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>No elections found</p>
+                </div>
+            </div>
+
+            <!-- CANDIDATES TAB -->
+            <div id="candidates" class="tab-pane">
+                <h2 style="margin-bottom: 20px;">Candidates</h2>
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="loadCandidates()">🔄 Refresh</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="candidatesTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Party</th>
+                                <th>Election</th>
+                                <th>Vote Count</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="candidatesBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="candidatesEmpty" class="empty-state">
+                    <div class="empty-state-icon">🙈</div>
+                    <p>No candidates found</p>
+                </div>
+            </div>
+
+            <!-- VOTES TAB -->
+            <div id="votes" class="tab-pane">
+                <h2 style="margin-bottom: 20px;">All Votes</h2>
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="loadVotes()">🔄 Refresh</button>
+                    <button class="btn-warning" onclick="confirmClearAllVotes()" style="margin-left: auto;">Clear All Votes</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="votesTable">
+                        <thead>
+                            <tr>
+                                <th>Vote ID</th>
+                                <th>Voter ID</th>
+                                <th>Candidate</th>
+                                <th>Election</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody id="votesBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="votesEmpty" class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>No votes recorded yet</p>
+                </div>
+            </div>
+
+            <!-- USERS TAB -->
+            <div id="users" class="tab-pane">
+                <h2 style="margin-bottom: 20px;">Users</h2>
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="loadUsers()">🔄 Refresh</button>
+                </div>
+                <div class="table-wrapper">
+                    <table id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div id="usersEmpty" class="empty-state">
+                    <div class="empty-state-icon">👥</div>
+                    <p>No users found</p>
+                </div>
+            </div>
+
+            <!-- ADMIN TOOLS TAB -->
+            <div id="admin" class="tab-pane">
+                <h2 style="margin-bottom: 20px; color: #f56565;">⚙️ Database Management</h2>
+                
+                <div style="background: #fed7d7; color: #742a2a; padding: 15px; border-radius: 6px; margin-bottom: 30px;">
+                    <strong>⚠️ Warning:</strong> These tools can permanently modify or delete your database data. Use with caution!
+                </div>
+
+                <h3 style="margin-bottom: 20px;">Actions</h3>
+                <div class="action-buttons">
+                    <button class="btn-danger" onclick="confirmClearAllVotes()">🗑️ Clear All Votes</button>
+                    <button class="btn-danger" onclick="confirmClearSpecificElection()">🗑️ Clear Specific Election</button>
+                    <button class="btn-danger" onclick="confirmResetDatabase()" style="margin-left: auto;">💣 RESET ENTIRE DATABASE</button>
+                </div>
+
+                <h3 style="margin-top: 40px; margin-bottom: 20px;">Server Status</h3>
+                <div class="election-detail">
+                    <div id="serverStatus">Checking...</div>
+                </div>
+
+                <h3 style="margin-top: 40px; margin-bottom: 20px;">API Endpoints</h3>
+                <div class="table-wrapper">
+                    <table style="font-size: 13px;">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Endpoint</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge badge-success">GET</span></td>
+                                <td>/api/health</td>
+                                <td>Server health check</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-success">GET</span></td>
+                                <td>/api/votes/results/:electionId</td>
+                                <td>Get voting results</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-warning">POST</span></td>
+                                <td>/api/votes</td>
+                                <td>Cast a vote</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-warning">POST</span></td>
+                                <td>/api/votes/admin/clear</td>
+                                <td>Clear all votes</td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge badge-warning">POST</span></td>
+                                <td>/api/votes/admin/clear/:electionId</td>
+                                <td>Clear votes for election</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION MODALS -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="confirmTitle">Confirm Action</div>
+            <div class="modal-body" id="confirmMessage">Are you sure?</div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="closeModal()">Cancel</button>
+                <button class="btn-danger" onclick="executeConfirmedAction()" id="confirmBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        let pendingAction = null;
+        let currentUser = null;
+
+        // Get current user from localStorage
+        function getCurrentUser() {
+          const user = localStorage.getItem('currentUser');
+          return user ? JSON.parse(user) : null;
+        }
+
+        // Check if current user is admin
+        function isAdmin() {
+          const user = getCurrentUser();
+          return user && user.role === 'admin';
+        }
+
+        // On page load, check user role and hide/show admin controls
+        document.addEventListener('DOMContentLoaded', () => {
+          currentUser = getCurrentUser();
+          
+          if (!isAdmin()) {
+            // Hide admin-only buttons for non-admins
+            document.querySelectorAll('[data-admin-only]').forEach(el => {
+              el.style.display = 'none';
+            });
+          }
+        });
+
+        // ==================== TAB SWITCHING ====================
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tabName = e.target.dataset.tab;
+                
+                // Prevent non-admins from accessing admin tab
+                if (tabName === 'admin' && !isAdmin()) {
+                    showAlert('Admin access required', 'error');
+                    return;
+                }
+                
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                
+                e.target.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+
+                // Auto-load data when switching tabs
+                if (tabName === 'elections') loadElections();
+                else if (tabName === 'candidates') loadCandidates();
+                else if (tabName === 'votes') loadVotes();
+                else if (tabName === 'users') loadUsers();
+                else if (tabName === 'admin') checkServerStatus();
+            });
+        });
+
+        // ==================== UTILITIES ====================
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+            setTimeout(() => alert.className = 'alert', 5000);
+        }
+
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleString();
+        }
+
+        function formatTime(dateStr) {
+            return new Date(dateStr).toLocaleTimeString();
+        }
+
+        function truncate(str, len = 30) {
+            return str.length > len ? str.substring(0, len) + '...' : str;
+        }
+
+        function openModal(title, message, action) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmModal').classList.add('active');
+            pendingAction = action;
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            pendingAction = null;
+        }
+
+        async function executeConfirmedAction() {
+            if (pendingAction) {
+                closeModal();
+                await pendingAction();
+            }
+        }
+
+        // ==================== DASHBOARD ====================
+        async function refreshDashboard() {
+            try {
+                // Load all stats
+                const [usersRes, electionsRes, candidatesRes, votesRes] = await Promise.all([
+                    fetch(`${API_BASE}/users`),
+                    fetch(`${API_BASE}/elections`),
+                    fetch(`${API_BASE}/candidates`),
+                    fetch(`${API_BASE}/votes`)
+                ]);
+
+                const users = await usersRes.json();
+                const elections = await electionsRes.json();
+                const candidates = await candidatesRes.json();
+                const votes = await votesRes.json();
+
+                document.getElementById('userCount').textContent = users.length || 0;
+                document.getElementById('electionCount').textContent = elections.length || 0;
+                document.getElementById('candidateCount').textContent = candidates.length || 0;
+                document.getElementById('voteCount').textContent = votes.length || 0;
+
+                // Load elections detail
+                loadDashboardElections(elections);
+            } catch (error) {
+                showAlert('Error loading dashboard: ' + error.message, 'error');
+            }
+        }
+
+        function loadDashboardElections(elections) {
+            const container = document.getElementById('dashboardElections');
+            
+            if (elections.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>No elections</p></div>';
+                return;
+            }
+
+            container.innerHTML = elections.map(e => `
+                <div class="election-detail">
+                    <div class="election-title">${e.title}</div>
+                    <div class="election-info">
+                        <div><strong>Status:</strong> ${e.status}</div>
+                        <div><strong>Created:</strong> ${formatDate(e.createdAt).split(' ')[0]}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== ELECTIONS ====================
+        async function loadElections() {
+            try {
+                const response = await fetch(`${API_BASE}/elections`);
+                const elections = await response.json();
+
+                const tbody = document.getElementById('electionsBody');
+                const empty = document.getElementById('electionsEmpty');
+
+                if (elections.length === 0) {
+                    empty.style.display = 'block';
+                    document.getElementById('electionsTable').style.display = 'none';
+                    return;
+                }
+
+                empty.style.display = 'none';
+                document.getElementById('electionsTable').style.display = 'table';
+
+                tbody.innerHTML = elections.map(e => `
+                    <tr>
+                        <td><code>${e.id.substring(0, 8)}</code></td>
+                        <td>${e.title}</td>
+                        <td>${truncate(e.description || '', 40)}</td>
+                        <td><span class="badge badge-${e.status === 'active' ? 'success' : 'warning'}">${e.status}</span></td>
+                        <td><span class="time">${formatDate(e.createdAt).split(' ')[0]}</span></td>
+                        <td><button class="btn-primary" onclick="loadElectionDetails('${e.id}')" style="padding: 5px 10px; font-size: 12px;">View</button></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showAlert('Error loading elections: ' + error.message, 'error');
+            }
+        }
+
+        async function loadElectionDetails(id) {
+            try {
+                const response = await fetch(`${API_BASE}/votes/results/${id}`);
+                const data = await response.json();
+                
+                const candidates = data.candidates || [];
+                alert(`Election Results:\nTotal Votes: ${data.totalVotes}\n\n${candidates.map(c => `${c.name} (${c.party}): ${c.voteCount} votes`).join('\n')}`);
+            } catch (error) {
+                showAlert('Error loading results: ' + error.message, 'error');
+            }
+        }
+
+        // ==================== CANDIDATES ====================
+        async function loadCandidates() {
+            try {
+                const response = await fetch(`${API_BASE}/candidates`);
+                const candidates = await response.json();
+
+                const tbody = document.getElementById('candidatesBody');
+                const empty = document.getElementById('candidatesEmpty');
+
+                if (candidates.length === 0) {
+                    empty.style.display = 'block';
+                    document.getElementById('candidatesTable').style.display = 'none';
+                    return;
+                }
+
+                empty.style.display = 'none';
+                document.getElementById('candidatesTable').style.display = 'table';
+
+                const totalVotes = candidates.reduce((sum, c) => sum + c.voteCount, 0);
+
+                tbody.innerHTML = candidates.map(c => {
+                    const percentage = totalVotes > 0 ? ((c.voteCount / totalVotes) * 100).toFixed(1) : '0';
+                    return `
+                        <tr>
+                            <td><code>${c.id.substring(0, 8)}</code></td>
+                            <td>${c.name}</td>
+                            <td>${c.party || 'Independent'}</td>
+                            <td>${truncate(c.electionTitle || '', 20)}</td>
+                            <td><strong>${c.voteCount}</strong></td>
+                            <td>${percentage}%</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                showAlert('Error loading candidates: ' + error.message, 'error');
+            }
+        }
+
+        // ==================== VOTES ====================
+        async function loadVotes() {
+            try {
+                // Get all elections first
+                const electionsRes = await fetch(`${API_BASE}/elections`);
+                const elections = await electionsRes.json();
+
+                let allVotes = [];
+
+                // Get votes for each election
+                for (const election of elections) {
+                    try {
+                        const votesRes = await fetch(`${API_BASE}/votes/election/${election.id}`);
+                        const votes = await votesRes.json();
+                        allVotes = allVotes.concat(votes || []);
+                    } catch (e) {
+                        console.error('Error loading votes for election:', e);
+                    }
+                }
+
+                const tbody = document.getElementById('votesBody');
+                const empty = document.getElementById('votesEmpty');
+
+                if (allVotes.length === 0) {
+                    empty.style.display = 'block';
+                    document.getElementById('votesTable').style.display = 'none';
+                    return;
+                }
+
+                empty.style.display = 'none';
+                document.getElementById('votesTable').style.display = 'table';
+
+                tbody.innerHTML = allVotes.map(v => `
+                    <tr>
+                        <td><code>${v.id ? v.id.substring(0, 8) : 'N/A'}</code></td>
+                        <td><code>${v.voterId.substring(0, 8)}</code></td>
+                        <td>${v.name}</td>
+                        <td>${truncate(v.election || '', 25)}</td>
+                        <td><span class="time">${formatDate(v.votedAt || new Date())}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showAlert('Error loading votes: ' + error.message, 'error');
+            }
+        }
+
+        // ==================== USERS ====================
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE}/users`);
+                const users = await response.json();
+
+                const tbody = document.getElementById('usersBody');
+                const empty = document.getElementById('usersEmpty');
+
+                if (users.length === 0) {
+                    empty.style.display = 'block';
+                    document.getElementById('usersTable').style.display = 'none';
+                    return;
+                }
+
+                empty.style.display = 'none';
+                document.getElementById('usersTable').style.display = 'table';
+
+                tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td><code>${u.id.substring(0, 8)}</code></td>
+                        <td>${u.username}</td>
+                        <td>${u.email}</td>
+                        <td><span class="time">${formatDate(u.createdAt).split(' ')[0]}</span></td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showAlert('Error loading users: ' + error.message, 'error');
+            }
+        }
+
+        // ==================== ADMIN ACTIONS ====================
+        function confirmClearAllVotes() {
+            if (!isAdmin()) {
+                showAlert('Admin access required', 'error');
+                return;
+            }
+            openModal(
+                '🗑️ Clear All Votes',
+                'This will delete all votes but keep elections and candidates. This action cannot be undone.',
+                clearAllVotes
+            );
+        }
+
+        async function clearAllVotes() {
+            try {
+                const user = getCurrentUser();
+                const response = await fetch(`${API_BASE}/votes/admin/clear`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to clear votes');
+                }
+
+                showAlert('✅ All votes cleared successfully!');
+                loadVotes();
+                refreshDashboard();
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        function confirmClearSpecificElection() {
+            if (!isAdmin()) {
+                showAlert('Admin access required', 'error');
+                return;
+            }
+            const electionId = prompt('Enter Election ID:');
+            if (!electionId) return;
+
+            openModal(
+                '🗑️ Clear Election Votes',
+                `This will clear all votes for election ${electionId}`,
+                () => clearSpecificElection(electionId)
+            );
+        }
+
+        async function clearSpecificElection(electionId) {
+            try {
+                const user = getCurrentUser();
+                const response = await fetch(`${API_BASE}/votes/admin/clear/${electionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: user.id })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to clear votes');
+                }
+
+                showAlert(`✅ Votes cleared for election ${electionId.substring(0, 8)}`);
+                loadVotes();
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        function confirmResetDatabase() {
+            openModal(
+                '💣 RESET ENTIRE DATABASE',
+                'This will DELETE ALL DATA (users, elections, candidates, votes). This action CANNOT be undone!',
+                resetDatabase
+            );
+        }
+
+        async function resetDatabase() {
+            try {
+                // Delete all data
+                await fetch(`${API_BASE}/elections`, { method: 'DELETE' }).catch(() => {});
+                showAlert('✅ Database reset complete. Refresh the page.');
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
+        // ==================== SERVER STATUS ====================
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+
+                const status = document.getElementById('serverStatus');
+                status.innerHTML = `
+                    <div style="color: #22543d;">
+                        <strong>✅ Server Status: ONLINE</strong><br>
+                        Port: ${data.port || 3000}<br>
+                        Uptime: ${data.uptime || 'N/A'}<br>
+                        Database: ${data.database || 'SQLite (voting.db)'}
+                    </div>
+                `;
+            } catch (error) {
+                const status = document.getElementById('serverStatus');
+                status.innerHTML = `
+                    <div style="color: #742a2a;">
+                        <strong>❌ Server Status: OFFLINE</strong><br>
+                        The API server is not responding. Make sure it's running on localhost:3000
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshDashboard();
+        });
+    </script>
+</body>
+</html>
