@@ -34,7 +34,11 @@ app.get('/api/health', (req, res) => {
 
 // Serve the frontend HTML
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'FRONTEND.html'));
+  res.sendFile(path.join(__dirname, 'Voters.html'));
+});
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
 // Error handling middleware

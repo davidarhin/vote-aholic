@@ -63,7 +63,7 @@ router.post('/', (req, res) => {
           db.run(
             'INSERT INTO votes (id, electionId, candidateId, voterId) VALUES (?, ?, ?, ?)',
             [id, electionId, candidateId, voterId],
-            function(err) {
+            function (err) {
               if (err) {
                 return res.status(500).json({ error: err.message });
               }
@@ -165,83 +165,76 @@ router.get('/election/:electionId', (req, res) => {
   );
 });
 
-// Clear/Reset all votes (ADMIN ONLY)
+// Clear/Reset all votes (ADMIN ONLY - Auth Removed per request)
 router.post('/admin/clear', (req, res) => {
-  const { userId } = req.body;
+  db.serialize(() => {
+    db.run('DELETE FROM votes', (err1) => {
+      if (err1) {
+        return res.status(500).json({ error: 'Failed to clear votes: ' + err1.message });
+      }
 
-  if (!userId) {
-    return res.status(401).json({ error: 'User ID required' });
-  }
-
-  // Check if user is admin
-  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required. Only administrators can clear votes.' });
-    }
-
-    db.serialize(() => {
-      db.run('DELETE FROM votes', (err1) => {
-        if (err1) {
-          return res.status(500).json({ error: 'Failed to clear votes: ' + err1.message });
+      // Reset all vote counts
+      db.run('UPDATE candidates SET voteCount = 0', (err2) => {
+        if (err2) {
+          return res.status(500).json({ error: 'Failed to reset counts: ' + err2.message });
         }
 
-        // Reset all vote counts
-        db.run('UPDATE candidates SET voteCount = 0', (err2) => {
-          if (err2) {
-            return res.status(500).json({ error: 'Failed to reset counts: ' + err2.message });
+        // Reset voter status
+        db.run('UPDATE voters SET hasVoted = 0, votedAt = NULL', (err3) => {
+          if (err3) {
+            return res.status(500).json({ error: 'Failed to reset voters: ' + err3.message });
           }
 
-          // Reset voter status
-          db.run('UPDATE voters SET hasVoted = 0, votedAt = NULL', (err3) => {
-            if (err3) {
-              return res.status(500).json({ error: 'Failed to reset voters: ' + err3.message });
-            }
-
-            res.json({ message: 'All votes cleared successfully' });
-          });
+          res.json({ message: 'All votes cleared successfully' });
         });
       });
     });
   });
 });
 
-// Clear votes for a specific election (ADMIN ONLY)
+// Clear votes for a specific election (ADMIN ONLY - Auth Removed per request)
 router.post('/admin/clear/:electionId', (req, res) => {
-  const { userId } = req.body;
   const electionId = req.params.electionId;
 
-  if (!userId) {
-    return res.status(401).json({ error: 'User ID required' });
-  }
+  db.serialize(() => {
+    db.run('DELETE FROM votes WHERE electionId = ?', [electionId], (err1) => {
+      if (err1) {
+        return res.status(500).json({ error: 'Failed to clear votes: ' + err1.message });
+      }
 
-  // Check if user is admin
-  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required. Only administrators can clear votes.' });
-    }
-
-    db.serialize(() => {
-      db.run('DELETE FROM votes WHERE electionId = ?', [electionId], (err1) => {
-        if (err1) {
-          return res.status(500).json({ error: 'Failed to clear votes: ' + err1.message });
+      // Reset vote counts for this election
+      db.run('UPDATE candidates SET voteCount = 0 WHERE electionId = ?', [electionId], (err2) => {
+        if (err2) {
+          return res.status(500).json({ error: 'Failed to reset counts: ' + err2.message });
         }
 
-        // Reset vote counts for this election
-        db.run('UPDATE candidates SET voteCount = 0 WHERE electionId = ?', [electionId], (err2) => {
-          if (err2) {
-            return res.status(500).json({ error: 'Failed to reset counts: ' + err2.message });
-          }
+        res.json({ message: `Votes cleared for election ${electionId}` });
+      });
+    });
+  });
+});
 
-          res.json({ message: `Votes cleared for election ${electionId}` });
-        });
+// Delete a specific vote
+router.delete('/:id', (req, res) => {
+  const voteId = req.params.id;
+
+  db.get('SELECT candidateId, electionId FROM votes WHERE id = ?', [voteId], (err, vote) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!vote) return res.status(404).json({ error: 'Vote not found' });
+
+    db.serialize(() => {
+      // 1. Delete the vote
+      db.run('DELETE FROM votes WHERE id = ?', [voteId], (err) => {
+        if (err) return res.status(500).json({ error: 'Failed to delete vote' });
+
+        // 2. Decrement candidate vote count
+        db.run('UPDATE candidates SET voteCount = voteCount - 1 WHERE id = ?', [vote.candidateId]);
+
+        // 3. Optional: Reset voter's status if they can vote again (depending on logic, usually 1 vote per election)
+        // For now, we just remove the record. If we want to allow re-voting, we'd need to update the `voters` table too if we tracked it there.
+        // Assuming `votes` table existence implies a vote was cast.
+
+        res.json({ message: 'Vote deleted successfully' });
       });
     });
   });

@@ -1,19 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VOTE-AHOLIC - Database Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0B4F6C 0%, #01BAEF 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -27,12 +34,12 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
         }
 
         h1 {
-            color: #667eea;
+            color: #0B4F6C;
             margin-bottom: 5px;
         }
 
@@ -60,19 +67,19 @@
         }
 
         .nav-tabs button.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
+            color: #20BF55;
+            border-bottom-color: #20BF55;
         }
 
         .nav-tabs button:hover {
-            color: #667eea;
+            color: #20BF55;
         }
 
         .content {
             background: white;
             border-radius: 8px;
             padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         .tab-pane {
@@ -91,11 +98,20 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: rgba(255, 255, 255, 0.9);
+            color: #0B4F6C;
             padding: 25px;
-            border-radius: 8px;
+            border-radius: 16px;
             text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
         .stat-number {
@@ -127,14 +143,14 @@
         }
 
         .btn-primary {
-            background: #667eea;
+            background: #20BF55;
             color: white;
         }
 
         .btn-primary:hover {
-            background: #5568d3;
+            background: #179e43;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(32, 191, 85, 0.4);
         }
 
         .btn-danger {
@@ -179,13 +195,18 @@
             border-bottom: 2px solid #e2e8f0;
         }
 
-        td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #e2e8f0;
+        tr {
+            transition: background-color 0.2s ease;
         }
 
         tr:hover {
-            background: #f7fafc;
+            background: #f8f9fa;
+        }
+
+        td {
+            padding: 16px 15px;
+            border-bottom: 1px solid #f1f3f5;
+            color: #495057;
         }
 
         .empty-state {
@@ -243,7 +264,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             align-items: center;
             justify-content: center;
             z-index: 1000;
@@ -291,8 +312,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .refresh-btn {
@@ -330,21 +356,153 @@
             display: flex;
             gap: 10px;
         }
+
+        /* WIZARD CSS */
+        .setup-steps {
+            display: flex;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .setup-steps:before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 30px;
+            right: 30px;
+            height: 3px;
+            background: #e9ecef;
+            z-index: 1;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: #e9ecef;
+            color: #666;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 auto 15px;
+            transition: all 0.3s;
+        }
+
+        .step.active .step-number {
+            background: #01BAEF;
+            color: white;
+        }
+
+        .step.completed .step-number {
+            background: #20BF55;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .candidate-fields {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px dashed #cbd5e0;
+            position: relative;
+        }
+
+        .remove-candidate-btn {
+            background: #f56565;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px dashed #0B4F6C;
+            color: #0B4F6C;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .btn-outline:hover {
+            background: #ebf4ff;
+        }
+
+        .wizard-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
             <h1>🗳️ VOTE-AHOLIC Admin Panel</h1>
             <p class="subtitle">Database & System Management</p>
-            
+
             <div class="nav-tabs">
                 <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+                <button class="tab-btn" data-tab="create">➕ Create Election</button>
                 <button class="tab-btn" data-tab="elections">Elections</button>
                 <button class="tab-btn" data-tab="candidates">Candidates</button>
                 <button class="tab-btn" data-tab="votes">Votes</button>
                 <button class="tab-btn" data-tab="users">Users</button>
-                <button class="tab-btn" data-tab="admin" style="margin-left: auto; color: #f56565;">⚙️ Admin Tools</button>
+                <button class="tab-btn" onclick="window.open('/', '_blank')" style="color: #667eea;">👁️ Voter
+                    View</button>
+                <button class="tab-btn" data-tab="admin" style="margin-left: auto; color: #f56565;">⚙️ Admin
+                    Tools</button>
             </div>
         </header>
 
@@ -378,6 +536,105 @@
 
                 <div class="action-buttons" style="margin-top: 40px;">
                     <button class="btn-primary" onclick="refreshDashboard()">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <!-- CREATE ELECTION TAB -->
+            <div id="create" class="tab-pane">
+                <h2 style="margin-bottom: 20px;">Create New Election</h2>
+
+                <div class="setup-steps">
+                    <div class="step active" id="step1">
+                        <div class="step-number">1</div>
+                        <div>Details</div>
+                    </div>
+                    <div class="step" id="step2">
+                        <div class="step-number">2</div>
+                        <div>Candidates</div>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-number">3</div>
+                        <div>Review</div>
+                    </div>
+                </div>
+
+                <div class="wizard-content">
+                    <!-- STEP 1 -->
+                    <div id="formStep1" class="form-step active">
+                        <div class="form-group">
+                            <label class="form-label">Election Title</label>
+                            <input type="text" class="form-input" id="electionTitle"
+                                placeholder="e.g. Student Council 2024">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-textarea" id="electionDescription" placeholder="Election goals..."
+                                rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-input" id="electionStart">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-input" id="electionEnd">
+                            </div>
+                        </div>
+                        <div class="wizard-actions">
+                            <div></div>
+                            <button class="btn-primary" onclick="nextStep(2)">Next: Candidates ➡️</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2 -->
+                    <div id="formStep2" class="form-step" style="display:none;">
+                        <div id="candidatesContainer">
+                            <div class="candidate-fields">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Name</label>
+                                        <input type="text" class="form-input c-name" placeholder="Candidate Name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Party</label>
+                                        <input type="text" class="form-input c-party" placeholder="Party/Affiliation">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="candidate-fields">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label class="form-label">Name</label>
+                                        <input type="text" class="form-input c-name" placeholder="Candidate Name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Party</label>
+                                        <input type="text" class="form-input c-party" placeholder="Party/Affiliation">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn-outline" onclick="addCandidateField()">➕ Add Another Candidate</button>
+
+                        <div class="wizard-actions">
+                            <button class="btn-warning" onclick="nextStep(1)">⬅️ Back</button>
+                            <button class="btn-primary" onclick="nextStep(3)">Next: Review ➡️</button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3 -->
+                    <div id="formStep3" class="form-step" style="display:none;">
+                        <div class="election-detail">
+                            <h3>Review Election</h3>
+                            <p><strong>Title:</strong> <span id="revTitle"></span></p>
+                            <p><strong>Candidates:</strong> <span id="revCount"></span></p>
+                        </div>
+                        <div class="wizard-actions">
+                            <button class="btn-warning" onclick="nextStep(2)">⬅️ Back</button>
+                            <button class="btn-primary" onclick="launchElection()">🚀 Launch Election</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -442,7 +699,8 @@
                 <h2 style="margin-bottom: 20px;">All Votes</h2>
                 <div class="action-buttons">
                     <button class="btn-primary" onclick="loadVotes()">🔄 Refresh</button>
-                    <button class="btn-warning" onclick="confirmClearAllVotes()" style="margin-left: auto;">Clear All Votes</button>
+                    <button class="btn-warning" onclick="confirmClearAllVotes()" style="margin-left: auto;">Clear All
+                        Votes</button>
                 </div>
                 <div class="table-wrapper">
                     <table id="votesTable">
@@ -494,16 +752,20 @@
             <!-- ADMIN TOOLS TAB -->
             <div id="admin" class="tab-pane">
                 <h2 style="margin-bottom: 20px; color: #f56565;">⚙️ Database Management</h2>
-                
-                <div style="background: #fed7d7; color: #742a2a; padding: 15px; border-radius: 6px; margin-bottom: 30px;">
-                    <strong>⚠️ Warning:</strong> These tools can permanently modify or delete your database data. Use with caution!
+
+                <div
+                    style="background: #fed7d7; color: #742a2a; padding: 15px; border-radius: 6px; margin-bottom: 30px;">
+                    <strong>⚠️ Warning:</strong> These tools can permanently modify or delete your database data. Use
+                    with caution!
                 </div>
 
                 <h3 style="margin-bottom: 20px;">Actions</h3>
                 <div class="action-buttons">
                     <button class="btn-danger" onclick="confirmClearAllVotes()">🗑️ Clear All Votes</button>
-                    <button class="btn-danger" onclick="confirmClearSpecificElection()">🗑️ Clear Specific Election</button>
-                    <button class="btn-danger" onclick="confirmResetDatabase()" style="margin-left: auto;">💣 RESET ENTIRE DATABASE</button>
+                    <button class="btn-danger" onclick="confirmClearSpecificElection()">🗑️ Clear Specific
+                        Election</button>
+                    <button class="btn-danger" onclick="confirmResetDatabase()" style="margin-left: auto;">💣 RESET
+                        ENTIRE DATABASE</button>
                 </div>
 
                 <h3 style="margin-top: 40px; margin-bottom: 20px;">Server Status</h3>
@@ -572,43 +834,56 @@
         let currentUser = null;
 
         // Get current user from localStorage
+        // Get current user from localStorage or return default admin
         function getCurrentUser() {
-          const user = localStorage.getItem('currentUser');
-          return user ? JSON.parse(user) : null;
+            const stored = localStorage.getItem('currentUser');
+            if (stored) {
+                const user = JSON.parse(stored);
+                // If the logged-in user is an admin, use them.
+                // If they are a voter, IGNORE them and use default-admin.
+                if (user.role === 'admin') return user;
+            }
+
+            // Return default admin for "No Login" access
+            return {
+                id: 'default-admin',
+                username: 'System Admin',
+                email: 'admin@vote-aholic.com',
+                role: 'admin'
+            };
         }
 
-        // Check if current user is admin
+        // Check if current user is admin (Always true for admin panel)
         function isAdmin() {
-          const user = getCurrentUser();
-          return user && user.role === 'admin';
+            return true;
         }
 
         // On page load, check user role and hide/show admin controls
         document.addEventListener('DOMContentLoaded', () => {
-          currentUser = getCurrentUser();
-          
-          if (!isAdmin()) {
-            // Hide admin-only buttons for non-admins
-            document.querySelectorAll('[data-admin-only]').forEach(el => {
-              el.style.display = 'none';
-            });
-          }
+            currentUser = getCurrentUser();
+
+            if (!isAdmin()) {
+                // Hide admin-only buttons for non-admins
+                document.querySelectorAll('[data-admin-only]').forEach(el => {
+                    el.style.display = 'none';
+                });
+            }
         });
 
         // ==================== TAB SWITCHING ====================
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const tabName = e.target.dataset.tab;
-                
+
                 // Prevent non-admins from accessing admin tab
                 if (tabName === 'admin' && !isAdmin()) {
                     showAlert('Admin access required', 'error');
                     return;
                 }
-                
+
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-                
+
                 e.target.classList.add('active');
                 document.getElementById(tabName).classList.add('active');
 
@@ -690,7 +965,7 @@
 
         function loadDashboardElections(elections) {
             const container = document.getElementById('dashboardElections');
-            
+
             if (elections.length === 0) {
                 container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><p>No elections</p></div>';
                 return;
@@ -732,7 +1007,10 @@
                         <td>${truncate(e.description || '', 40)}</td>
                         <td><span class="badge badge-${e.status === 'active' ? 'success' : 'warning'}">${e.status}</span></td>
                         <td><span class="time">${formatDate(e.createdAt).split(' ')[0]}</span></td>
-                        <td><button class="btn-primary" onclick="loadElectionDetails('${e.id}')" style="padding: 5px 10px; font-size: 12px;">View</button></td>
+                        <td>
+                            <button class="btn-primary" onclick="loadElectionDetails('${e.id}')" style="padding: 5px 10px; font-size: 12px;">View</button>
+                            <button class="btn-danger" onclick="confirmDeleteElection('${e.id}')" style="padding: 5px 10px; font-size: 12px;">Delete</button>
+                        </td>
                     </tr>
                 `).join('');
             } catch (error) {
@@ -744,11 +1022,45 @@
             try {
                 const response = await fetch(`${API_BASE}/votes/results/${id}`);
                 const data = await response.json();
-                
+
                 const candidates = data.candidates || [];
-                alert(`Election Results:\nTotal Votes: ${data.totalVotes}\n\n${candidates.map(c => `${c.name} (${c.party}): ${c.voteCount} votes`).join('\n')}`);
+                const resultsHtml = `
+                    <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                        <h3>Results: ${data.electionTitle}</h3>
+                        <p>Total Votes: <strong>${data.totalVotes}</strong></p>
+                        <hr style="margin: 15px 0;">
+                        ${candidates.map(c => `
+                            <div style="margin-bottom: 10px;">
+                                <strong>${c.name}</strong> (${c.party}): ${c.voteCount} votes
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                // Show in a modal or alert (using alert for now but formatted)
+                alert(`Election Results: ${data.electionTitle}\nTotal Votes: ${data.totalVotes}\n\n${candidates.map(c => `- ${c.name}: ${c.voteCount} votes`).join('\n')}`);
             } catch (error) {
                 showAlert('Error loading results: ' + error.message, 'error');
+            }
+        }
+
+        function confirmDeleteElection(id) {
+            openModal(
+                '🗑️ Delete Election',
+                'Are you sure you want to delete this election? All candidates and results will be lost forever.',
+                () => deleteElection(id)
+            );
+        }
+
+        async function deleteElection(id) {
+            try {
+                const res = await fetch(`${API_BASE}/elections/${id}`, { method: 'DELETE' });
+                if (!res.ok) throw new Error('Failed to delete election');
+                showAlert('✅ Election deleted successfully');
+                loadElections();
+                refreshDashboard();
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
             }
         }
 
@@ -829,10 +1141,32 @@
                         <td>${v.name}</td>
                         <td>${truncate(v.election || '', 25)}</td>
                         <td><span class="time">${formatDate(v.votedAt || new Date())}</span></td>
+                        <td>
+                            <button onclick="deleteVote('${v.id}')" class="btn-small btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                 `).join('');
             } catch (error) {
                 showAlert('Error loading votes: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteVote(voteId) {
+            if (!confirm('Are you sure you want to delete this vote?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/votes/${voteId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    showAlert('Vote deleted successfully', 'success');
+                    loadVotes();
+                    refreshDashboard(); // Update stats
+                } else {
+                    const data = await res.json();
+                    showAlert('Failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (err) {
+                showAlert('Error: ' + err.message, 'error');
             }
         }
 
@@ -860,10 +1194,41 @@
                         <td>${u.username}</td>
                         <td>${u.email}</td>
                         <td><span class="time">${formatDate(u.createdAt).split(' ')[0]}</span></td>
+                        <td>
+                            <button onclick="deleteUser('${u.id}')" class="btn-small btn-danger" ${u.role === 'admin' ? 'disabled' : ''}>
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
                     </tr>
                 `).join('');
             } catch (error) {
                 showAlert('Error loading users: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (userId === 'default-admin') {
+                showAlert('Cannot delete the default system admin', 'warning');
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/users/${userId}`, { method: 'DELETE' });
+                if (res.ok) {
+                    showAlert('User deleted successfully', 'success');
+                    loadUsers();
+                } else {
+                    let errorMessage = 'Failed to delete user';
+                    try {
+                        const data = await res.json();
+                        errorMessage = data.error || errorMessage;
+                    } catch (e) { }
+                    showAlert('Failed: ' + errorMessage, 'error');
+                }
+            } catch (err) {
+                showAlert('Error: ' + err.message, 'error');
             }
         }
 
@@ -949,7 +1314,7 @@
         async function resetDatabase() {
             try {
                 // Delete all data
-                await fetch(`${API_BASE}/elections`, { method: 'DELETE' }).catch(() => {});
+                await fetch(`${API_BASE}/elections`, { method: 'DELETE' }).catch(() => { });
                 showAlert('✅ Database reset complete. Refresh the page.');
             } catch (error) {
                 showAlert('Error: ' + error.message, 'error');
@@ -982,10 +1347,126 @@
             }
         }
 
+        // ==================== WIZARD LOGIC ====================
+        function nextStep(step) {
+            // Validate Step 1
+            if (step === 2) {
+                const title = document.getElementById('electionTitle').value;
+                if (!title) { showAlert('Please enter a title', 'error'); return; }
+            }
+
+            // Validate Step 2
+            if (step === 3) {
+                const candidates = document.querySelectorAll('.c-name');
+                let valid = 0;
+                candidates.forEach(c => { if (c.value.trim()) valid++; });
+                if (valid < 2) { showAlert('Please add at least 2 candidates', 'error'); return; }
+
+                // Update review
+                document.getElementById('revTitle').textContent = document.getElementById('electionTitle').value;
+                document.getElementById('revCount').textContent = valid;
+            }
+
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+
+            // Mark prev completed
+            for (let i = 1; i < step; i++) document.getElementById(`step${i}`).classList.add('completed');
+
+            document.querySelectorAll('.form-step').forEach(f => f.style.display = 'none');
+            document.getElementById(`formStep${step}`).style.display = 'block';
+        }
+
+        function addCandidateField() {
+            const div = document.createElement('div');
+            div.className = 'candidate-fields';
+            div.innerHTML = `
+                <button class="remove-candidate-btn" onclick="this.parentElement.remove()">❌</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-input c-name" placeholder="Candidate Name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Party</label>
+                        <input type="text" class="form-input c-party" placeholder="Party/Affiliation">
+                    </div>
+                </div>
+            `;
+            document.getElementById('candidatesContainer').appendChild(div);
+        }
+
+        async function launchElection() {
+            try {
+                const title = document.getElementById('electionTitle').value;
+                const description = document.getElementById('electionDescription').value;
+                const startDate = document.getElementById('electionStart').value || new Date().toISOString();
+                const endDate = document.getElementById('electionEnd').value;
+                const user = getCurrentUser();
+
+                if (!user) { showAlert('Please login first', 'error'); return; }
+
+                // 1. Create Election
+                const res = await fetch(`${API_BASE}/elections`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title, description, startDate, endDate,
+                        creatorId: user.id
+                    })
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json();
+                    throw new Error(errData.error || 'Failed to create election');
+                }
+                const electionData = await res.json();
+                const electionId = electionData.id;
+
+                // 2. Add Candidates
+                const candidateDivs = document.querySelectorAll('.candidate-fields');
+                for (const div of candidateDivs) {
+                    const name = div.querySelector('.c-name').value;
+                    const party = div.querySelector('.c-party').value;
+                    if (name.trim()) {
+                        await fetch(`${API_BASE}/candidates`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                electionId, name, party
+                            })
+                        });
+                    }
+                }
+
+                showAlert('✅ Election Created Successfully!');
+
+                // Reset form
+                document.getElementById('electionTitle').value = '';
+                nextStep(1);
+
+                // Go to elections tab
+                document.querySelector('[data-tab="elections"]').click();
+
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'error');
+            }
+        }
+
         // ==================== INIT ====================
         document.addEventListener('DOMContentLoaded', () => {
             refreshDashboard();
+
+            // Auto-refresh every 10 seconds
+            setInterval(() => {
+                const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+                if (activeTab === 'dashboard') refreshDashboard();
+                else if (activeTab === 'elections') loadElections();
+                else if (activeTab === 'candidates') loadCandidates();
+                else if (activeTab === 'votes') loadVotes();
+            }, 10000);
         });
     </script>
 </body>
+
 </html>

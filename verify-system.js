@@ -90,7 +90,7 @@ async function testApiHealth() {
   printHeader('TEST 1: API Health Check');
   try {
     const response = await httpRequest('GET', `${API_BASE}/health`);
-    
+
     if (response.status === 200) {
       testSuccess('API server is responding');
       testInfo(`Response: ${response.data.status}`);
@@ -104,7 +104,7 @@ async function testApiHealth() {
 
 function testDatabase() {
   printHeader('TEST 2: Database Verification');
-  
+
   return new Promise((resolve) => {
     const db = new sqlite3.Database(dbPath, (err) => {
       if (err) {
@@ -159,7 +159,7 @@ function testDatabase() {
 
 async function testApiEndpoints() {
   printHeader('TEST 3: API Endpoints');
-  
+
   const endpoints = [
     { method: 'GET', path: '/elections', name: 'GET /elections' },
     { method: 'GET', path: '/candidates', name: 'GET /candidates' },
@@ -182,7 +182,7 @@ async function testApiEndpoints() {
 
 async function testVoteClearEndpoint() {
   printHeader('TEST 4: Vote Clear Endpoint');
-  
+
   try {
     const response = await httpRequest('POST', `${API_BASE}/votes/admin/clear`, {});
     if (response.status === 200 || response.status === 201) {
@@ -198,10 +198,10 @@ async function testVoteClearEndpoint() {
 
 async function testFileSystem() {
   printHeader('TEST 5: File System');
-  
+
   const fs = require('fs');
   const requiredFiles = [
-    { name: 'FRONTEND.html', file: path.join(__dirname, 'FRONTEND.html') },
+    { name: 'Voters.html', file: path.join(__dirname, 'Voters.html') },
     { name: 'admin.html', file: path.join(__dirname, 'admin.html') },
     { name: 'admin-tools.js', file: path.join(__dirname, 'admin-tools.js') },
     { name: 'server.js', file: path.join(__dirname, 'server.js') },
@@ -234,10 +234,10 @@ async function generateReport() {
   printHeader('Test Summary');
   console.log(`\n  ✅ Passed: ${testsPassed}`);
   console.log(`  ❌ Failed: ${testsFailed}`);
-  
+
   const total = testsPassed + testsFailed;
   const percentage = Math.round((testsPassed / total) * 100);
-  
+
   console.log(`\n  Overall: ${percentage}% (${testsPassed}/${total})`);
 
   if (testsFailed === 0) {

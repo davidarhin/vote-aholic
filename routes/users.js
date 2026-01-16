@@ -36,7 +36,7 @@ router.post('/', (req, res) => {
     db.run(
       'INSERT INTO users (id, username, email, password, role) VALUES (?, ?, ?, ?, ?)',
       [id, username, email, hashedPassword, userRole],
-      function(err) {
+      function (err) {
         if (err) {
           if (err.message.includes('UNIQUE')) {
             res.status(400).json({ error: 'Username or email already exists' });
@@ -62,6 +62,21 @@ router.get('/:id', (req, res) => {
       res.status(404).json({ error: 'User not found' });
     } else {
       res.json(row);
+    }
+  });
+});
+
+// Delete user
+router.delete('/:id', (req, res) => {
+  const userId = req.params.id;
+
+  db.run('DELETE FROM users WHERE id = ?', [userId], function (err) {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else if (this.changes === 0) {
+      res.status(404).json({ error: 'User not found' });
+    } else {
+      res.json({ message: 'User deleted successfully' });
     }
   });
 });
@@ -119,7 +134,7 @@ router.post('/election/join', (req, res) => {
   db.run(
     'INSERT OR IGNORE INTO voters (id, electionId, userId, hasVoted) VALUES (?, ?, ?, ?)',
     [id, electionId, userId, 0],
-    function(err) {
+    function (err) {
       if (err) {
         res.status(500).json({ error: err.message });
       } else {

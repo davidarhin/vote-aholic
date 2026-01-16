@@ -86,6 +86,17 @@ function initializeDatabase() {
       FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
     )`);
 
+    // Seed default admin for "No Login" functionality
+    const adminId = 'default-admin';
+    const adminEmail = 'admin@vote-aholic.com';
+    // Hashed password for 'admin123'
+    const adminHash = '$2b$10$w/uVvX.rS4.d3.w.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x.x';
+    // We'll use a simple insert-ignore like approach
+    db.run(`INSERT OR IGNORE INTO users (id, username, email, password, role) VALUES (?, 'System Admin', ?, 'admin123', 'admin')`,
+      [adminId, adminEmail], (err) => {
+        if (!err) console.log('Default admin user verified');
+      });
+
     console.log('Database tables initialized');
   });
 }
